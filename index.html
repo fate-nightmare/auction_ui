@@ -1,10 +1,95 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
 		<meta charset="utf-8" />
-		<title></title>
+		<title>拍卖</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+		<link href="css/common.css" rel="stylesheet" type="text/css" />
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+		<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+		<script type="text/javascript" src="js/jq_ajax_config.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+			
+			.el-menu-vertical-demo:not(.el-menu--collapse) {
+				width: 200px;
+				min-height: 400px;
+			}
+			
+			.el-container {
+				height: 100%;
+			}
+			
+			.container{
+				width:100%;
+			}
+		</style>
 	</head>
+
 	<body>
-		
+
+		<div class="container">
+			<div id="indexApp" class="row" v-cloak>
+				<el-container style='height:95vh; border: 1px solid #eee'>
+					<el-aside width="200px">
+						<el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
+							<el-radio-button :label="false">展开</el-radio-button>
+							<el-radio-button :label="true">收起</el-radio-button>
+						</el-radio-group>
+						<el-menu default-active="1-4-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
+							<el-menu-item index="1">
+								<i class="el-icon-menu"></i>
+								<span @click="showView('auctionList.html')" slot="title">拍卖列表</span>
+							</el-menu-item>
+							<el-menu-item index="2">
+								<i class="el-icon-menu"></i>
+								<span @click="showView('auctionManage.html')" slot="title">拍卖商品管理页</span>
+							</el-menu-item>
+							<el-menu-item index="3">
+								<i class="el-icon-menu"></i>
+								<span @click="showView('auctionQuery.html')" slot="title">查看竞拍结果</span>
+							</el-menu-item>
+						</el-menu>
+					</el-aside>
+					<el-main>
+						<div id="cnt"></div>
+					</el-main>
+				</el-container>
+			</div>
+		</div>
+
 	</body>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/dialogs.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script>
+		var indexApp = new Vue({
+			data: {
+				isCollapse: true,
+				users: {
+
+				}
+			},
+			methods: {
+				showView(url) {
+					$('#cnt').load(url);
+				},
+				handleOpen(key, keyPath) {
+					console.log(key, keyPath);
+				},
+				handleClose(key, keyPath) {
+					console.log(key, keyPath);
+				}
+			},
+			mounted() {
+				this.showView('work.html');
+			}
+		}).$mount('#indexApp');
+	</script>
+
 </html>

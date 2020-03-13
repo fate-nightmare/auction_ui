@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>拍卖列表</title>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<div id="auctionListApp" class="row" v-cloak>
+				<h3>在线拍卖系统</h3>
+				<hr />
+				<div>
+					<el-form :inline="true" :model="users" class="demo-form-inline" label-width="80px">
+						<el-form-item label="审批人">
+							<el-input v-model="users.name"></el-input>
+						</el-form-item>
+						<el-form-item label="描述">
+							<el-input v-model="users.ms"></el-input>
+						</el-form-item>
+						<el-form-item label="开始时间">
+							<el-input v-model="users.ks"></el-input>
+						</el-form-item>
+						<el-form-item label="结束时间">
+							<el-input v-model="users.js"></el-input>
+						</el-form-item>
+						<el-form-item label="起拍价">
+							<el-input v-model="users.price"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<el-button type="primary" @click="onSubmit">查询</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+				<div>
+					<template>
+						<el-table :data="pageInfo.list" stripe style="width: 100%">
+							<el-table-column prop="auctionName" label="名称">
+							</el-table-column>
+							<el-table-column prop="auctionDesc" label="描述">
+							</el-table-column>
+							<el-table-column prop="auctionStartTime" label="开始时间">
+							</el-table-column>
+							<el-table-column prop="auctionEndTime" label="结束时间">
+							</el-table-column>
+							<el-table-column prop="auctionStartPrice" label="起拍价">
+							</el-table-column>
+							<el-table-column label="操作">
+								<template slot-scope="temp">
+									<el-button @click="auctionsPage(temp.row.auctionId)" type="danger" round>竞拍</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</template>
+				</div>
+				<div>
+					<el-button @click="fristPage" type="primary">首页</el-button>
+					<el-button v-if="pageInfo.hasPreviousPage" @click="prePage" type="primary">上一页</el-button>
+					第<span>{{pageInfo.pageNum}}</span>页 共<span>{{pageInfo.pages}}</span>页 （总数<span>{{pageInfo.total}}</span>）
+					<el-button v-if="pageInfo.hasNextPage" @click="nextPage" type="primary">下一页</el-button>
+					<el-button @click="lastPage" type="primary">尾页</el-button>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		var auctionListApp = new Vue({
+			data: {
+				users: [{
+					name: '',
+					ms: '',
+					ks: '',
+					js: '',
+					price: ''
+				}],
+				pageInfo: {}
+			},
+			methods: {
+				fristPage() {
+					this.goToQueryAll(1, this.pageInfo.pageSize);
+				},
+				prePage() {
+					this.goToQueryAll(this.pageInfo.prePage, this.pageInfo.pageSize);
+				},
+				nextPage() {
+					this.goToQueryAll(this.pageInfo.nextPage, this.pageInfo.pageSize);
+				},
+				lastPage() {
+					this.goToQueryAll(this.pageInfo.lastPage, this.pageInfo.pageSize);
+				},
+				goToQueryAll(pageNum, pageSize) {
+					let _this = this;
+					$.getJSON(`http://127.0.0.1:8080/api/list/${pageNum}/${pageSize}`, function(a) {
+						console.info(a);
+						_this.pageInfo = a;
+					});
+				},
+				auctionsPage(auctionId) {
+					let _this = this;
+					console.info("ID：" + auctionId);
+					//单独存储拍卖品编号
+					window.sessionStorage.setItem('pid', JSON.stringify(auctionId));
+					$.getJSON(`http://127.0.0.1:8080/api/list/queryById/${auctionId}`, function(a) {
+						//存入到缓存
+						window.sessionStorage.setItem('a', JSON.stringify(a));
+						location.href = "auctionsPage.html";
+					});
+				},
+				onSubmit() {
+					console.log('submit!');
+				}
+			},
+			mounted() {
+				this.goToQueryAll(1, 3);
+			}
+		}).$mount('#auctionListApp');
+	</script>
+
+</html>

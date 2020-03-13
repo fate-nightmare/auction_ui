@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>添加商品</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+		<link href="css/common.css" rel="stylesheet" type="text/css" />
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+		<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+		<script type="text/javascript" src="js/jq_ajax_config.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<div id="auctionUpdateApp" class="row" v-cloak>
+				<h3>在线拍卖系统</h3>
+				<hr />
+				<h3 style="color: #0096FF;">拍卖品信息</h3>
+				<div>
+					<el-form :model="auction" label-width="100px" class="demo-ruleForm">
+						<el-form-item label="名称" prop="auctionName">
+							<el-input v-model="auction.auctionName"></el-input>
+						</el-form-item>
+						<el-form-item label="起拍价" prop="auctionStartPrice">
+							<el-input v-model="auction.auctionStartPrice" placeholder="必须为数字"></el-input>
+						</el-form-item>
+						<el-form-item label="底价" prop="auctionUpset">
+							<el-input v-model="auction.auctionUpset" placeholder="必须为数字"></el-input>
+						</el-form-item>
+						<el-form-item label="开始时间" prop="auctionStartTime">
+							<el-date-picker type="date" size="small" placeholder="选择日期" v-model="auction.auctionStartTime" style="width: 100%;"></el-date-picker>
+						</el-form-item>
+						<el-form-item label="结束时间" prop="auctionEndTime">
+							<el-date-picker type="date" size="small" placeholder="选择日期" v-model="auction.auctionEndTime" style="width: 100%;"></el-date-picker>
+						</el-form-item>
+						<el-form-item label="拍卖品图片" prop="auctionPicType">
+							<!--<el-upload class="avatar-uploader" action="https://jsonplaceholder.typicode.com/posts/" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+								<img v-if="imageUrl" :src="imageUrl" class="avatar">
+								<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+							</el-upload>-->
+							<el-input v-model="auction.auctionPicType"></el-input>
+							<el-button type="primary" @click="">选择文件</el-button>
+							<span>图片名字</span>
+						</el-form-item>
+						<el-form-item label="描述" prop="auctionDesc">
+							<el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="auction.auctionDesc">
+							</el-input>
+						</el-form-item>
+						<el-form-item>
+							<el-button type="primary" @click="onUpdate">保存</el-button>
+							<el-button onclick="javascript:history.back(-1)">取消</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/dialogs.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script>
+		var auctionUpdateApp = new Vue({
+			data: {
+				auction: {
+					auctionId: '',
+					auctionName: '',
+					auctionStartPrice: '',
+					auctionUpset: '',
+					auctionStartTime: '',
+					auctionEndTime: '',
+					auctionPic: '',
+					auctionPicType: '',
+					auctionDesc: ''
+				}
+			},
+			methods: {
+				onUpdate(){
+					let _this = this;
+					$.ajax(`http://127.0.0.1:8080/api/list/update`, {
+						type: "put",
+						dataType: "json",
+						contentType: "application/json",
+						data: JSON.stringify(_this.auction),
+						success(res) {
+							if(res.code == "200") {
+								alert("修改成功");
+								location.href="index.html";
+							} else {
+								alert("修改失败");
+							}
+						}
+					});
+				}
+			},
+			mounted() {
+				let _this = this;
+
+				//取缓存对象
+				let auctionStr = window.sessionStorage.getItem('update');
+				if(auctionStr) {
+					this.auction=JSON.parse(auctionStr);//反序列化
+					console.info(this.auction);
+				}
+			}
+		}).$mount('#auctionUpdateApp');
+	</script>
+
+</html>

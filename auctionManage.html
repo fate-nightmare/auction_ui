@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>拍卖列表</title>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<div id="auctionManageApp" class="row" v-cloak>
+				<h3>在线拍卖系统<el-button style="float: right;">注销</el-button></h3>
+				<hr />
+				<div>
+					<el-form :inline="true" :model="auction" class="demo-form-inline" ref="personForm" :rules="personRules" label-width="80px">
+						<el-form-item label="拍卖品名">
+							<el-input v-model="auction.auctionName"></el-input>
+						</el-form-item>
+						<el-form-item label="描述">
+							<el-input v-model="auction.auctionDesc"></el-input>
+						</el-form-item>
+						<el-form-item label="开始时间">
+							<el-input v-model="auction.auctionStartTime"></el-input>
+						</el-form-item>
+						<el-form-item label="结束时间">
+							<el-input v-model="auction.auctionEndTime"></el-input>
+						</el-form-item>
+						<el-form-item label="起拍价">
+							<el-input v-model="auction.auctionStartPrice"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<el-button type="primary" @click="onSubmit">查询</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+				<div>
+					<el-button type="primary" @click="auctionAdd()">发布</el-button>
+				</div>
+				<div>
+					<template>
+						<el-table :data="pageInfo.list" stripe style="width: 100%">
+							<el-table-column prop="auctionName" label="名称">
+							</el-table-column>
+							<el-table-column prop="auctionDesc" label="描述">
+							</el-table-column>
+							<el-table-column prop="auctionStartTime" label="开始时间">
+							</el-table-column>
+							<el-table-column prop="auctionEndTime" label="结束时间">
+							</el-table-column>
+							<el-table-column prop="auctionStartPrice" label="起拍价">
+							</el-table-column>
+							<el-table-column label="操作">
+								<template slot-scope="temp">
+									<el-button @click="auctionUpdate(temp.row.auctionId)" type="danger" round>修改</el-button>
+									<el-button @click="onDel(temp.row.auctionId)" type="danger" round>删除</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</template>
+				</div>
+				<div>
+					<el-button @click="fristPage" type="primary">首页</el-button>
+					<el-button v-if="pageInfo.hasPreviousPage" @click="prePage" type="primary">上一页</el-button>
+					第<span>{{pageInfo.pageNum}}</span>页 共<span>{{pageInfo.pages}}</span>页 （总数<span>{{pageInfo.total}}</span>）
+					<el-button v-if="pageInfo.hasNextPage" @click="nextPage" type="primary">下一页</el-button>
+					<el-button @click="lastPage" type="primary">尾页</el-button>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		var auctionManageApp = new Vue({
+			data: {
+				auction: [{
+					auctionId: '',
+					auctionName: '',
+					auctionStartPrice: '',
+					auctionUpset: '',
+					auctionStartTime: '',
+					auctionEndTime: '',
+					auctionPic: '',
+					auctionPicType: '',
+					auctionDesc: ''
+				}],
+				pageInfo: {}
+			},
+			methods: {
+				onDel(auctionId){
+					let _this = this;
+					console.info("ID："+auctionId);
+					if(window.confirm('是否移除当前拍卖品')) {
+						$.ajax(`http://127.0.0.1:8080/api/list/del/${auctionId}`, {
+						type: "delete",
+						dataType: "json",
+						success(res) {
+							if(res.code == "200") {
+								alert("删除成功");
+								location.href="index.html";
+							} else {
+								alert("删除失败");
+							}
+						}
+					});
+					}
+				},
+				fristPage() {
+					this.goToQueryAll(1, this.pageInfo.pageSize);
+				},
+				prePage() {
+					this.goToQueryAll(this.pageInfo.prePage, this.pageInfo.pageSize);
+				},
+				nextPage() {
+					this.goToQueryAll(this.pageInfo.nextPage, this.pageInfo.pageSize);
+				},
+				lastPage() {
+					this.goToQueryAll(this.pageInfo.lastPage, this.pageInfo.pageSize);
+				},
+				goToQueryAll(pageNum, pageSize) {
+					let _this = this;
+					$.getJSON(`http://127.0.0.1:8080/api/list/${pageNum}/${pageSize}`, function(a) {
+						console.info(a);
+						_this.pageInfo = a;
+					});
+				},
+				auctionUpdate(auctionId) {
+					let _this = this;
+					console.info("ID："+auctionId);
+					$.getJSON(`http://127.0.0.1:8080/api/list/queryById/${auctionId}`, function(a) {
+						//存入到缓存
+						window.sessionStorage.setItem('update', JSON.stringify(a));
+						location.href = "auctionUpdate.html";
+					});
+				},
+				auctionAdd() {
+					location.href = "auctionAdd.html";
+				},
+				onSubmit() {
+					console.log('submit!');
+				}
+			},
+			mounted() {
+				this.goToQueryAll(1, 3);
+			}
+		}).$mount('#auctionManageApp');
+	</script>
+
+</html>

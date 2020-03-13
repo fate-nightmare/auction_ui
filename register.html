@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>注册</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+		<link href="css/common.css" rel="stylesheet" type="text/css" />
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+		<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+		<script type="text/javascript" src="js/jq_ajax_config.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<div id="registerApp" class="row" v-cloak>
+				<img src="images/logo.jpg" />
+				<div>
+					<el-form :model="users" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+						<el-form-item label="用户名：" prop="userName">
+							<el-input v-model="users.userName"></el-input>
+						</el-form-item>
+						<el-form-item label="密码：" prop="userPassword">
+							<el-input v-model="users.userPassword"></el-input>
+						</el-form-item>
+						<el-form-item label="身份证号：" prop="userCardNo">
+							<el-input v-model="users.userCardNo"></el-input>
+						</el-form-item>
+						<el-form-item label="电话：" prop="userTel">
+							<el-input v-model="users.userTel"></el-input>
+						</el-form-item>
+						<el-form-item label="住址：" prop="userAddress">
+							<el-input v-model="users.userAddress"></el-input>
+						</el-form-item>
+						<el-form-item label="邮政编号：" prop="userPostNumber">
+							<el-input v-model="users.userPostNumber"></el-input>
+						</el-form-item>
+						<el-checkbox v-model="checked">我同意<span style="color: #0096FF;">《服务条款》</span></el-checkbox>
+						<el-form-item>
+							<el-button type="primary" @click="onRegister()">注册</el-button>
+							<el-button @click="resetForm('ruleForm')">重置</el-button>
+						</el-form-item>
+					</el-form>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/dialogs.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script>
+		var registerApp = new Vue({
+			el: "#registerApp",
+			data: {
+				checked: false,
+				users: {
+					userId: '',
+					userName: '',
+					userPassword: '',
+					userCardNo: '',
+					userTel: '',
+					userAddress: '',
+					userPostNumber: '',
+					userIsadmin: '',
+					userQuestion: '',
+					userAnswer: ''
+				},
+				rules: {
+					userName: [{
+							required: true,
+							message: '请输入用户名',
+							trigger: 'blur'
+						},
+						{
+							min: 2,
+							max: 10,
+							message: '长度在 2 到 10 个字符',
+							trigger: 'blur'
+						}
+					],
+					userPassword: [{
+							required: true,
+							message: '请输入密码',
+							trigger: 'blur'
+						},
+						{
+							min: 6,
+							max: 15,
+							message: '长度在 6到 15 个字符',
+							trigger: 'blur'
+						}
+					],
+					userCardNo: [{
+							required: true,
+							message: '请输入身份证',
+							trigger: 'blur'
+						},
+						{
+							min: 18,
+							max: 18,
+							message: '长度在 18 个字符',
+							trigger: 'blur'
+						}
+					],
+					userTel: [{
+							required: true,
+							message: '请输入电话',
+							trigger: 'blur'
+						},
+						{
+							min: 11,
+							max: 11,
+							message: '长度在 11 个字符',
+							trigger: 'blur'
+						}
+					],
+					userAddress: [{
+						required: true,
+						message: '请输入地址',
+						trigger: 'blur'
+					}],
+					userPostNumber: [{
+						required: true,
+						message: '请输入邮政编码',
+						trigger: 'blur'
+					}]
+				}
+			},
+			methods: {
+				onRegister() {
+					let _this = this;
+					$.ajax(`http://127.0.0.1:8080/api/user/register`, {
+						type: "post",
+						dataType: "json",
+						contentType: "application/json",
+						data: JSON.stringify(_this.users),
+						success(res) {
+							if(res.code == "200") {
+								showAlertDialog('保存成功');
+								_this.clearContent();
+								closeWindowDialog();
+								window.location.href="login.html";
+							} else {
+								alert("保存失败");
+							}
+						}
+					});
+				}
+			},
+			mounted() {
+				
+			}
+		})
+	</script>
+
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>竞拍页</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+		<link href="css/common.css" rel="stylesheet" type="text/css" />
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="css/index.css" />
+		<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+		<script type="text/javascript" src="js/jq_ajax_config.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<div id="auctionsPageApp" class="row" v-cloak>
+				<h3>在线拍卖系统
+					<span style="margin-left: 30%;">当前用户：<span v-text="rau.userName" name="name" style="color: #0096FF;"></span></span>
+					<el-button style="float: right;" onclick="javascript:history.back(-1)">返回</el-button>
+				</h3>
+				<hr />
+				<div>
+					<template>
+						<el-table :data="auction" stripe style="width: 70%">
+							<el-table-column prop="auctionName" label="名称">
+							</el-table-column>
+							<el-table-column prop="auctionDesc" label="描述">
+							</el-table-column>
+							<el-table-column prop="auctionStartTime" label="开始时间">
+							</el-table-column>
+							<el-table-column prop="auctionEndTime" label="结束时间">
+							</el-table-column>
+							<el-table-column prop="auctionStartPrice" label="起拍价">
+							</el-table-column>
+						</el-table>
+					</template>
+					<span style="float: right; margin-top: -100px;"><img src="images/ad20.jpg" /></span>
+				</div>
+				<hr style="margin-top: 100px;" />
+				<div>
+					<el-form :inline="true" :model="record" class="demo-form-inline" label-width="80px">
+						<el-form-item label="出价">
+							<el-input v-model="record.auctionPrice"></el-input>
+						</el-form-item>
+						<el-form-item>
+							<el-button type="primary" @click="onSubmit">竞拍</el-button>
+							<span style="color: red;">不能低于最高竞拍价</span>
+						</el-form-item>
+					</el-form>
+					<el-button type="primary" @click="goToPage">刷新</el-button>
+					<el-button type="primary" @click="goToIndex">返回列表</el-button>
+				</div>
+				<div>
+					<template>
+						<el-table :data="rau" stripe style="width: 100%">
+							<el-table-column prop="auctionTime" label="竞拍时间">
+							</el-table-column>
+							<el-table-column prop="auctionPrice" label="竞拍价格">
+							</el-table-column>
+							<el-table-column prop="userName" label="竞拍人">
+							</el-table-column>
+						</el-table>
+					</template>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/dialogs.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+	<script>
+		var auctionsPageApp = new Vue({
+			data: {
+				isCollapse: true,
+				userId:'',
+				userName:'',
+				record: {
+					id: '',
+					userId: '',
+					auctionId: '',
+					auctionTime: '',
+					auctionPrice: ''
+				},
+				rau: [{
+					userName: '',
+					auctionTime: '',
+					auctionPrice: ''
+				}],
+				auction: [{
+					auctionId: '',
+					auctionName: '',
+					auctionStartPrice: '',
+					auctionUpset: '',
+					auctionStartTime: '',
+					auctionEndTime: '',
+					auctionPic: '',
+					auctionPicType: '',
+					auctionDesc: ''
+				}],
+				users: [{
+					name: '宝刀',
+					ms: '村正',
+					ks: '2020-02-25 00:00:00',
+					js: '2020-02-29 00:00:00',
+					price: '999999999'
+				}],
+			},
+			methods: {
+				onSubmit() {
+					let _this = this;
+					_this.record.auctionTime = new Date();
+					_this.record.auctionPrice = _this.record.auctionPrice;
+					_this.record.userId = _this.userId;
+					_this.record.auctionId = _this.auction.auctionId;
+					
+					$.ajax(`http://127.0.0.1:8080/api/r/insertByRecord`, {
+						type: "post",
+						dataType: "json",
+						contentType: "application/json",
+						data: JSON.stringify(_this.record),
+						success(res) {
+							if(res.code == "200") {
+								alert("竞拍成功");
+							} else {
+								alert("竞拍失败");
+							}
+						}
+					});
+				},
+				goToPage(){
+					location.href="auctionsPage.html";
+				},
+				goToIndex(){
+					location.href="index.html";
+				}
+			},
+			mounted() {
+				let _this = this;
+				
+				/*跨域访问session（获取登录人姓名）*/
+				$.getJSON(`http://127.0.0.1:8080/api/user/login/session`, function(login) {
+					_this.userName = login.userName;
+					let userName = login.userName;
+					$.getJSON(`http://127.0.0.1:8080/api/user/queryByUserName/${userName}`, function(u) {
+						console.info(u.userId);
+						_this.userId = u.userId;
+					});
+				});
+				
+				//取缓存对象
+				let auctionStr = window.sessionStorage.getItem('a');
+				if(auctionStr) {
+					this.auction.push(JSON.parse(auctionStr));
+					let id = window.sessionStorage.getItem('pid');
+					this.auction.auctionId = JSON.parse(id);
+					let auctionId = this.auction.auctionId;
+					$.getJSON(`http://127.0.0.1:8080/api/r/queryByRid/${auctionId}`, function(a) {
+						console.info(a);
+						_this.rau = a;
+					});
+				}
+			}
+		}).$mount('#auctionsPageApp');
+	</script>
+
+</html>

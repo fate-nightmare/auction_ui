@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>查看竞拍结果</title>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<div id="auctionQueryApp" class="row" v-cloak>
+				<h3>在线拍卖系统<span style="float: right;">当前用户：<span v-text="user.userName" name="name" style="color: #0096FF;"></span></span></h3>
+				<hr />
+				<div>
+					<template>
+						<el-table :data="rau" stripe style="width: 100%">
+							<el-table-column prop="auctionName" label="名称">
+							</el-table-column>
+							<el-table-column prop="auctionStartTime" label="开始时间">
+							</el-table-column>
+							<el-table-column prop="auctionEndTime" label="结束时间">
+							</el-table-column>
+							<el-table-column prop="auctionStartPrice" label="起拍价">
+							</el-table-column>
+							<el-table-column prop="auctionPrice" label="成拍价">
+							</el-table-column>
+							<el-table-column prop="userName" label="买家">
+							</el-table-column>
+						</el-table>
+					</template>
+				</div>
+				<div>
+					<h3>拍卖中的商品</h3>
+					<div>
+						<template>
+							<el-table :data="pageInfo.list" stripe style="width: 100%">
+								<el-table-column prop="auctionName" label="名称">
+								</el-table-column>
+								<el-table-column prop="auctionStartTime" label="开始时间">
+								</el-table-column>
+								<el-table-column prop="auctionEndTime" label="结束时间">
+								</el-table-column>
+								<el-table-column prop="auctionStartPrice" label="起拍价">
+								</el-table-column>
+								<el-table-column label="出价记录">
+									<el-table-column prop="userName" label="出价人">
+									</el-table-column>
+									<el-table-column prop="auctionPrice" label="出价金额">
+									</el-table-column>
+								</el-table-column>
+							</el-table>
+							<div>
+								<el-button @click="fristPage" type="primary">首页</el-button>
+								<el-button v-if="pageInfo.hasPreviousPage" @click="prePage" type="primary">上一页</el-button>
+								第<span>{{pageInfo.pageNum}}</span>页 共<span>{{pageInfo.pages}}</span>页 （总数<span>{{pageInfo.total}}</span>）
+								<el-button v-if="pageInfo.hasNextPage" @click="nextPage" type="primary">下一页</el-button>
+								<el-button @click="lastPage" type="primary">尾页</el-button>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		var auctionQueryApp = new Vue({
+			data: {
+				isCollapse: true,
+				pageInfo: {},
+				rau: [{
+					auctionName: '',
+					auctionStartPrice: '',
+					auctionUpset: '',
+					auctionStartTime: '',
+					auctionEndTime: '',
+					userName: '',
+					auctionPrice: ''
+				}],
+				auction: {
+					auctionId: '',
+					auctionName: '',
+					auctionStartPrice: '',
+					auctionUpset: '',
+					auctionStartTime: '',
+					auctionEndTime: '',
+					auctionPic: '',
+					auctionPicType: '',
+					auctionDesc: ''
+				},
+				user: {
+					userId: '',
+					userName: '',
+					userPassword: '',
+					userCardNo: '',
+					userTel: '',
+					userAddress: '',
+					userPostNumber: '',
+					userIsadmin: '',
+					userQuestion: '',
+					userAnswer: ''
+				},
+			},
+			methods: {
+				goToMin() {
+					let _this = this;
+					$.getJSON(`http://127.0.0.1:8080/api/rau/queryByMinTime`, function(rau) {
+						console.info(rau);
+						_this.rau = rau;
+					});
+				},
+				fristPage() {
+					this.goToMax(1, this.pageInfo.pageSize);
+				},
+				prePage() {
+					this.goToMax(this.pageInfo.prePage, this.pageInfo.pageSize);
+				},
+				nextPage() {
+					this.goToMax(this.pageInfo.nextPage, this.pageInfo.pageSize);
+				},
+				lastPage() {
+					this.goToMax(this.pageInfo.lastPage, this.pageInfo.pageSize);
+				},
+				goToMax(pageNum, pageSize) {
+					let _this = this;
+					$.getJSON(`http://127.0.0.1:8080/api/rau/${pageNum}/${pageSize}`, function(rau) {
+						console.info(rau);
+						_this.pageInfo = rau;
+					});
+				}
+			},
+			mounted() {
+				let _this = this;
+
+				this.goToMin();
+				this.goToMax(1, 3);
+
+				/*跨域访问session（获取登录人姓名）*/
+				$.getJSON(`http://127.0.0.1:8080/api/user/login/session`, function(login) {
+					_this.user.userName = login.userName;
+				});
+			}
+		}).$mount('#auctionQueryApp');
+	</script>
+
+</html>

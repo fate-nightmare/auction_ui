@@ -143,12 +143,10 @@
 						data: JSON.stringify(_this.users),
 						success(res) {
 							if(res.code == "200") {
-								showAlertDialog('保存成功');
-								_this.clearContent();
-								closeWindowDialog();
+								alert("注册成功");
 								window.location.href="login.html";
 							} else {
-								alert("保存失败");
+								alert("注册失败");
 							}
 						}
 					});

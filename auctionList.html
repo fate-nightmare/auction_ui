@@ -17,24 +17,24 @@
 				<h3>在线拍卖系统</h3>
 				<hr />
 				<div>
-					<el-form :inline="true" :model="users" class="demo-form-inline" label-width="80px">
-						<el-form-item label="审批人">
-							<el-input v-model="users.name"></el-input>
+					<el-form :inline="true" :model="auction" class="demo-form-inline" label-width="80px">
+						<el-form-item label="名称">
+							<el-input v-model="auction.auctionName"></el-input>
 						</el-form-item>
 						<el-form-item label="描述">
-							<el-input v-model="users.ms"></el-input>
+							<el-input v-model="auction.auctionDesc"></el-input>
 						</el-form-item>
 						<el-form-item label="开始时间">
-							<el-input v-model="users.ks"></el-input>
+							<el-input v-model="auction.auctionStartTime"></el-input>
 						</el-form-item>
 						<el-form-item label="结束时间">
-							<el-input v-model="users.js"></el-input>
+							<el-input v-model="auction.auctionEndTime"></el-input>
 						</el-form-item>
 						<el-form-item label="起拍价">
-							<el-input v-model="users.price"></el-input>
+							<el-input v-model="auction.auctionStartPrice"></el-input>
 						</el-form-item>
 						<el-form-item>
-							<el-button type="primary" @click="onSubmit">查询</el-button>
+							<el-button type="primary" @click="onSubmit(1,3)">查询</el-button>
 						</el-form-item>
 					</el-form>
 				</div>
@@ -72,13 +72,13 @@
 	<script>
 		var auctionListApp = new Vue({
 			data: {
-				users: [{
-					name: '',
-					ms: '',
-					ks: '',
-					js: '',
-					price: ''
-				}],
+				auction: {
+					auctionName: '',
+					auctionStartPrice: '',
+					auctionStartTime: '',
+					auctionEndTime: '',
+					auctionDesc: ''
+				},
 				pageInfo: {}
 			},
 			methods: {
@@ -112,8 +112,23 @@
 						location.href = "auctionsPage.html";
 					});
 				},
-				onSubmit() {
-					console.log('submit!');
+				onSubmit(pageNum, pageSize) {
+					let _this = this;
+					console.info(_this.auction.auctionName);
+					$.getJSON(`http://127.0.0.1:8080/api/list/queryByCondition/${_this.auction.auctionName}/${_this.auction.auctionDesc}/${_this.auction.auctionStartTime}/${_this.auction.auctionEndTime}/${_this.auction.auctionStartPrice}/${pageNum}/${pageSize}`, function(a) {
+						console.info(a);
+						_this.pageInfo = a;
+					});
+					/*$.ajax(`http://127.0.0.1:8080/api/list/queryByCondition/{pageNum}/{pageSize}`, {
+						type: "get",
+						dataType: "json",
+						contentType: "application/json",
+						data: JSON.stringify(_this.auction),
+						success(a) {
+							console.info(a);
+							_this.pageInfo = a;
+						}
+					});*/
 				}
 			},
 			mounted() {
